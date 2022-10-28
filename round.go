@@ -36,7 +36,7 @@ func (r *Round) Raise(agent int, bet Bet) error {
 	}
 	r.bet = bet
 	r.i = (r.i + 1) % len(r.dice)
-	r.usedOne = bet[1] == 1
+	r.usedOne = r.usedOne || bet[1] == 1
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (r *Round) Exact(agent int) (bool, error) {
 	tot := uint(0)
 	for _, dice := range r.dice {
 		for _, die := range dice {
-			if die == v {
+			if die == v || (die == 1 && !r.usedOne) {
 				tot++
 			}
 		}
@@ -68,12 +68,12 @@ func (r *Round) Calls(agent int) (bool, error) {
 	tot := uint(0)
 	for _, dice := range r.dice {
 		for _, die := range dice {
-			if die == v {
+			if die == v || (die == 1 && !r.usedOne) {
 				tot++
 			}
 		}
 	}
-	return q >= tot, nil
+	return tot >= q, nil
 }
 
 // InitRound based on the number of dice for each agent. Expects i < len(numDice)
@@ -95,4 +95,5 @@ func InitDice(numDice []uint) [][]uint {
 			dice[i][j] = uint(rand.Intn(6) + 1)
 		}
 	}
+	return dice
 }
