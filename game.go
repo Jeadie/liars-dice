@@ -43,13 +43,37 @@ func (r *Round) Raise(agent int, bet Bet) error {
 // Exact called by an agent returns true iff the current bet is exactly equal to the state of the dice.
 // Error if agent cannot currently make an Exact call.
 func (r *Round) Exact(agent int) (bool, error) {
-	return false, nil
+	if r.i != agent {
+		return false, fmt.Errorf("agent %d cannot Exact. It is agent %d's turn", agent, r.i)
+	}
+	q, v := r.bet[0], r.bet[1]
+	tot := uint(0)
+	for _, dice := range r.dice {
+		for _, die := range dice {
+			if die == v {
+				tot++
+			}
+		}
+	}
+	return q == tot, nil
 }
 
 // Calls called by an agent returns true iff the current bet is greater than or equal to the state
 // of the dice. Error if agent cannot currently make an Calls.
 func (r *Round) Calls(agent int) (bool, error) {
-	return false, nil
+	if r.i != agent {
+		return false, fmt.Errorf("agent %d cannot Call. It is agent %d's turn", agent, r.i)
+	}
+	q, v := r.bet[0], r.bet[1]
+	tot := uint(0)
+	for _, dice := range r.dice {
+		for _, die := range dice {
+			if die == v {
+				tot++
+			}
+		}
+	}
+	return q >= tot, nil
 }
 
 // InitRound based on the number of dice for each agent. Expects i < len(numDice)
