@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-poker/pkg/agents"
-	liars_dice "github.com/Jeadie/liars-poker/pkg/game"
+	"github.com/Jeadie/liars-poker/pkg/game"
 	"github.com/spf13/cobra"
 	"os"
 	"strconv"
@@ -21,7 +21,7 @@ var (
 				os.Exit(1)
 			}
 			dice := ConvertNumDice(args)
-			round := liars_dice.InitRound(dice, 0)
+			round := game.InitRound(dice, 0)
 
 			// Create and initialise agents
 			agents := make([]agents2.Agent, len(dice))
@@ -38,18 +38,18 @@ var (
 			for true {
 				for i, agent := range agents {
 					act := agent.Play(*round)
-					fmt.Printf("Player %d %s\n", i, act.ToString())
-					agent, changeDice, err := round.PlayTurn(liars_dice.Agent(i), act)
-
-					if err != nil {
-						return
+					agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
+					for err != nil {
+						act := agent.Play(*round)
+						agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 					}
+					fmt.Printf("Player %d %s\n", i, act.ToString())
 
 					if changeDice != 0 {
 						if changeDice > 0 {
-							fmt.Printf("Player %d gains %d dice\n", agent, changeDice)
+							fmt.Printf("Player %d gains %d dice\n", agentIdx, changeDice)
 						} else {
-							fmt.Printf("Player %d loses %d dice(s)\n", agent, -1*changeDice)
+							fmt.Printf("Player %d loses %d dice(s)\n", agentIdx, -1*changeDice)
 						}
 						os.Exit(0)
 					}
@@ -74,6 +74,5 @@ func ConvertNumDice(numDice []string) []uint {
 
 func init() {
 	rootCmd.AddCommand(roundCmd)
-	//roundCmd.PersistentFlags().StringArrayVar(&numDice, "dice", []string{"5", "5", "5"}, "The number of dice each player has. Also determines the number of players.")
 	roundCmd.PersistentFlags().UintVar(&humanAgent, "idx", 0, "The index of the user in the order of players.")
 }

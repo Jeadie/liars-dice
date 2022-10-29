@@ -11,9 +11,17 @@ type ActionType string
 
 const (
 	Raise ActionType = "raise"
-	Exact            = "exact"
-	Call             = "CurrBet"
+	Exact ActionType = "exact"
+	Call  ActionType = "call"
 )
+
+func ParseActionType(x string) (ActionType, error) {
+	var actionType ActionType
+	if x != string(Call) && x != string(Raise) && x != string(Exact) {
+		return actionType, fmt.Errorf("%s is not a valid action", x)
+	}
+	return ActionType(x), nil
+}
 
 type Action struct {
 	T     ActionType `json:"T"`
@@ -55,7 +63,7 @@ func (b Bet) Raises(c Bet) bool {
 // raise (CurrAgent.e. it's not their turn), or the raise is not valid given the state of the round.
 func (r *Round) Raise(agent Agent, bet Bet) error {
 	if r.CurrAgent != agent {
-		return fmt.Errorf("gent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
+		return fmt.Errorf("agent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
 	}
 	if !bet.Raises(r.CurrBet) {
 		return fmt.Errorf("CurrBet %d %ds cannot be played above %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
@@ -135,16 +143,17 @@ func InitDice(numDice []uint) [][]uint {
 // PlayTurn on a board. Returns the number of dice an Agent should gain/lose after that turn. An
 // error is returned if the action cannot be played at this stage of the round.
 func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
-	var correct bool
+	var isExactly bool
+	var isAtLeast bool
 	var err error
 
 	switch action.T {
 	case Raise:
 		err = r.Raise(agent, action.Raise)
 	case Call:
-		correct, err = r.Calls(agent)
+		isAtLeast, err = r.Calls(agent)
 	case Exact:
-		correct, err = r.Exact(agent)
+		isExactly, err = r.Exact(agent)
 	}
 	if err != nil {
 		return 0, 0, err
@@ -156,14 +165,13 @@ func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
 
 	// Round finished. determine outcome.
 	if action.T == Call {
-		losingAgent := r.CurrAgent
-		if correct {
-			losingAgent = Agent((int(r.CurrAgent) - 1) % len(r.Dice))
+		if isAtLeast {
+			return r.CurrAgent, -1, nil
+		} else {
+			return Agent((int(r.CurrAgent) - 1) % len(r.Dice)), -1, nil
 		}
-		return losingAgent, -1, nil
-
 	} else if action.T == Exact {
-		if correct {
+		if isExactly {
 			return r.CurrAgent, 1, nil
 		}
 		return r.CurrAgent, -2, nil
