@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	agents2 "github.com/Jeadie/liars-poker/pkg/agents"
 	"github.com/Jeadie/liars-poker/pkg/game"
 	"github.com/spf13/cobra"
 	"os"
@@ -23,38 +22,8 @@ var (
 			dice := ConvertNumDice(args)
 			round := game.InitRound(dice, 0)
 
-			// Create and initialise agents
-			agents := make([]agents2.Agent, len(dice))
-			for i := 0; i < len(dice); i++ {
-				if uint(i) == humanAgent {
-					agents[i] = agents2.ConstructHuman()
-				} else {
-					agents[i] = agents2.ConstructProbAgent()
-				}
-				agents[i].Initialise(*round, round.Dice[i])
-			}
-
-			// Consecutive agent's turn
-			for true {
-				for i, agent := range agents {
-					act := agent.Play(*round)
-					agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
-					for err != nil {
-						act := agent.Play(*round)
-						agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
-					}
-					fmt.Printf("Player %d %s\n", i, act.ToString())
-
-					if changeDice != 0 {
-						if changeDice > 0 {
-							fmt.Printf("Player %d gains %d dice\n", agentIdx, changeDice)
-						} else {
-							fmt.Printf("Player %d loses %d dice(s)\n", agentIdx, -1*changeDice)
-						}
-						os.Exit(0)
-					}
-				}
-			}
+			agents := MakeAgents(uint(len(dice)), humanAgent)
+			PlayRound(round, agents)
 		},
 	}
 )
