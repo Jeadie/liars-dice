@@ -22,7 +22,12 @@ func MakeAgents(n uint, humanIdx uint) []agents2.Agent {
 
 func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 	for i, agent := range agents {
-		agent.Initialise(*round, round.Dice[i])
+		agent.Handle(game.Event{
+			EType: game.RoundStart,
+			RoundStart: game.RoundStartEvent{
+				DiceRolled: round.Dice[i],
+			},
+		})
 	}
 
 	// Consecutive agent's turn

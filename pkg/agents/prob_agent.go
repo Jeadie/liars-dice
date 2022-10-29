@@ -28,7 +28,3 @@ func (h *ProbAgent) Play(r game.Round) game.Action {
 func (h *ProbAgent) Handle(e game.Event) {
 
 }
-
-func (h *ProbAgent) Initialise(r game.Round, dice []uint) {
-
-}

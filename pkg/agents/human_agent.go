@@ -85,7 +85,3 @@ func (h *HumanAgent) Handle(e game.Event) {
 	}
 
 }
-
-func (h *HumanAgent) Initialise(r game.Round, dice []uint) {
-
-}
