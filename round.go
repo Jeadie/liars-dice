@@ -12,20 +12,20 @@ type ActionType string
 const (
 	Raise ActionType = "raise"
 	Exact            = "exact"
-	Call             = "bet"
+	Call             = "CurrBet"
 )
 
 type Action struct {
-	t     ActionType
-	agent Agent
-	bet   Bet
+	T     ActionType `json:"T"`
+	Agent Agent      `json:"Agent"`
+	Raise Bet        `json:"Raise,omitempty"`
 }
 
 type Round struct {
-	dice    [][]uint
-	usedOne bool
-	bet     Bet
-	i       Agent
+	Dice      [][]uint `json:"Dice"`
+	UsedOne   bool     `json:"UsedOne"`
+	CurrBet   Bet      `json:"Bet"`
+	CurrAgent Agent    `json:"Agent"`
 }
 
 // Raises returns true if the Bet, b can raise the Bet c. A Bet can raise another
@@ -39,32 +39,32 @@ func (b Bet) Raises(c Bet) bool {
 	return 10*b[0]+b[1] > 10*c[0]+c[1]
 }
 
-// Raise a bet on the round by a specific agent. Returns an error if agent cannot currently make a
-// raise (i.e. it's not their turn), or the raise is not valid given the state of the round.
+// Raise a CurrBet on the round by a specific Agent. Returns an error if Agent cannot currently make a
+// raise (CurrAgent.e. it's not their turn), or the raise is not valid given the state of the round.
 func (r *Round) Raise(agent Agent, bet Bet) error {
-	if r.i != agent {
-		return fmt.Errorf("agent %d cannot Raise. It is agent %d's turn", agent, r.i)
+	if r.CurrAgent != agent {
+		return fmt.Errorf("Agent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
 	}
-	if !bet.Raises(r.bet) {
-		return fmt.Errorf("bet %d %ds cannot be played above %d %ds", bet[0], bet[1], r.bet[0], r.bet[1])
+	if !bet.Raises(r.CurrBet) {
+		return fmt.Errorf("CurrBet %d %ds cannot be played above %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
 	}
-	r.bet = bet
-	r.i = Agent((int(r.i) + 1) % len(r.dice))
-	r.usedOne = r.usedOne || bet[1] == 1
+	r.CurrBet = bet
+	r.CurrAgent = Agent((int(r.CurrAgent) + 1) % len(r.Dice))
+	r.UsedOne = r.UsedOne || bet[1] == 1
 	return nil
 }
 
-// Exact called by an agent returns true iff the current bet is exactly equal to the state of the dice.
-// Error if agent cannot currently make an Exact call.
+// Exact called by an Agent returns true iff the current CurrBet is exactly equal to the state of the Dice.
+// Error if Agent cannot currently make an Exact call.
 func (r *Round) Exact(agent Agent) (bool, error) {
-	if r.i != agent {
-		return false, fmt.Errorf("agent %d cannot Exact. It is agent %d's turn", agent, r.i)
+	if r.CurrAgent != agent {
+		return false, fmt.Errorf("Agent %d cannot Exact. It is Agent %d's turn", agent, r.CurrAgent)
 	}
-	q, v := r.bet[0], r.bet[1]
+	q, v := r.CurrBet[0], r.CurrBet[1]
 	tot := uint(0)
-	for _, dice := range r.dice {
+	for _, dice := range r.Dice {
 		for _, die := range dice {
-			if die == v || (die == 1 && !r.usedOne) {
+			if die == v || (die == 1 && !r.UsedOne) {
 				tot++
 			}
 		}
@@ -72,17 +72,17 @@ func (r *Round) Exact(agent Agent) (bool, error) {
 	return q == tot, nil
 }
 
-// Calls called by an agent returns true iff the current bet is greater than or equal to the state
-// of the dice. Error if agent cannot currently make an Calls.
+// Calls called by an Agent returns true iff the current CurrBet is greater than or equal to the state
+// of the Dice. Error if Agent cannot currently make an Calls.
 func (r *Round) Calls(agent Agent) (bool, error) {
-	if r.i != agent {
-		return false, fmt.Errorf("agent %d cannot Call. It is agent %d's turn", agent, r.i)
+	if r.CurrAgent != agent {
+		return false, fmt.Errorf("Agent %d cannot Call. It is Agent %d's turn", agent, r.CurrAgent)
 	}
-	q, v := r.bet[0], r.bet[1]
+	q, v := r.CurrBet[0], r.CurrBet[1]
 	tot := uint(0)
-	for _, dice := range r.dice {
+	for _, dice := range r.Dice {
 		for _, die := range dice {
-			if die == v || (die == 1 && !r.usedOne) {
+			if die == v || (die == 1 && !r.UsedOne) {
 				tot++
 			}
 		}
@@ -91,24 +91,24 @@ func (r *Round) Calls(agent Agent) (bool, error) {
 }
 
 func (r *Round) GetDicePerAgent() []uint {
-	numDice := make([]uint, len(r.dice))
-	for i, die := range r.dice {
+	numDice := make([]uint, len(r.Dice))
+	for i, die := range r.Dice {
 		numDice[i] = uint(len(die))
 	}
 	return numDice
 }
 
-// InitRound based on the number of dice for each agent. Expects i < len(numDice)
+// InitRound based on the number of Dice for each Agent. Expects CurrAgent < len(numDice)
 func InitRound(numDice []uint, i Agent) *Round {
 	return &Round{
-		dice:    InitDice(numDice),
-		usedOne: false,
-		bet:     [2]uint{0, 0},
-		i:       i,
+		Dice:      InitDice(numDice),
+		UsedOne:   false,
+		CurrBet:   [2]uint{0, 0},
+		CurrAgent: i,
 	}
 }
 
-// InitDice based on the number of dice
+// InitDice based on the number of Dice
 func InitDice(numDice []uint) [][]uint {
 	dice := make([][]uint, len(numDice))
 	for i, die := range numDice {
@@ -120,40 +120,40 @@ func InitDice(numDice []uint) [][]uint {
 	return dice
 }
 
-// PlayRound of liar's dice. Returns the new number of dice for the next round.
+// PlayRound of liar's Dice. Returns the new number of Dice for the next round.
 func PlayRound(r Round, actions chan Action, errs chan error) []uint {
 	var err error
 	var correct bool
 
 	dice := r.GetDicePerAgent()
 	for action := range actions {
-		switch action.t {
+		switch action.T {
 		case Raise:
-			err = r.Raise(action.agent, action.bet)
+			err = r.Raise(action.Agent, action.Raise)
 		case Call:
-			correct, err = r.Calls(action.agent)
+			correct, err = r.Calls(action.Agent)
 		case Exact:
-			correct, err = r.Exact(action.agent)
+			correct, err = r.Exact(action.Agent)
 		}
 		if err != nil {
 			errs <- err
 			continue
 		}
-		if action.t == Raise {
+		if action.T == Raise {
 			continue
 		}
 
 		// Round finished. determine outcome.
-		if action.t == Call {
-			losingAgent := r.i
+		if action.T == Call {
+			losingAgent := r.CurrAgent
 			if correct {
-				losingAgent = Agent((int(r.i) - 1) % len(r.dice))
+				losingAgent = Agent((int(r.CurrAgent) - 1) % len(r.Dice))
 			}
 			dice[losingAgent]--
 			break
-		} else if action.t == Exact {
+		} else if action.T == Exact {
 			if correct {
-				dice[r.i] += 2
+				dice[r.CurrAgent] += 2
 			}
 			break
 		}

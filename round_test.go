@@ -24,10 +24,10 @@ func TestBet_Raises(t *testing.T) {
 
 func TestRound_Calls(t *testing.T) {
 	r := &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: false,
-		bet:     Bet{3, 2},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   false,
+		CurrBet:   Bet{3, 2},
+		CurrAgent: 0,
 	}
 	result, err := r.Calls(0)
 	if err != nil {
@@ -38,10 +38,10 @@ func TestRound_Calls(t *testing.T) {
 	}
 
 	r = &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: false,
-		bet:     Bet{4, 2},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   false,
+		CurrBet:   Bet{4, 2},
+		CurrAgent: 0,
 	}
 	result, err = r.Calls(0)
 	if err != nil {
@@ -54,10 +54,10 @@ func TestRound_Calls(t *testing.T) {
 
 func TestRound_Calls_withOneBetted(t *testing.T) {
 	r := &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: false,
-		bet:     Bet{0, 0},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   false,
+		CurrBet:   Bet{0, 0},
+		CurrAgent: 0,
 	}
 	err := r.Raise(0, Bet{1, 1})
 	if err != nil {
@@ -80,10 +80,10 @@ func TestRound_Calls_withOneBetted(t *testing.T) {
 
 func TestRound_Exact(t *testing.T) {
 	r := &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: false,
-		bet:     Bet{3, 2},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   false,
+		CurrBet:   Bet{3, 2},
+		CurrAgent: 0,
 	}
 	result, _ := r.Exact(0)
 	if result {
@@ -91,10 +91,10 @@ func TestRound_Exact(t *testing.T) {
 	}
 
 	r = &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: false,
-		bet:     Bet{4, 2},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   false,
+		CurrBet:   Bet{4, 2},
+		CurrAgent: 0,
 	}
 	result, _ = r.Calls(0)
 	if !result {
@@ -102,10 +102,10 @@ func TestRound_Exact(t *testing.T) {
 	}
 
 	r = &Round{
-		dice:    [][]uint{{2, 2}, {1, 2}},
-		usedOne: true,
-		bet:     Bet{4, 2},
-		i:       0,
+		Dice:      [][]uint{{2, 2}, {1, 2}},
+		UsedOne:   true,
+		CurrBet:   Bet{4, 2},
+		CurrAgent: 0,
 	}
 	result, _ = r.Calls(0)
 	if result {
