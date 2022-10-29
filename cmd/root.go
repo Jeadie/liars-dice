@@ -20,6 +20,17 @@ var rootCmd = &cobra.Command{
 		round := game.InitRound(dice, 0)
 		agents := MakeAgents(uint(len(dice)), humanAgent)
 
+		// GameStartEvent
+		for i, agent := range agents {
+			agent.Handle(game.Event{
+				EType: game.GameStart,
+				GameStart: game.GameStartEvent{
+					NumDicePerAgent: dice,
+					AgentIdx:        i,
+				},
+			})
+		}
+
 		winnerIdx, hasWon := WinningPlayer(dice)
 		for !hasWon {
 			fmt.Printf("\n-- New Round -- \n")

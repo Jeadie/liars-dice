@@ -8,7 +8,13 @@ const (
 	AgentRemoved  EventType = "agent-removed"
 	RoundStart    EventType = "round-start"
 	InvalidAction EventType = "invalid-action"
+	GameStart     EventType = "game-start"
 )
+
+type GameStartEvent struct {
+	NumDicePerAgent []uint
+	AgentIdx        int
+}
 
 type InvalidActionEvent struct {
 	InvalidAction Action
@@ -42,4 +48,5 @@ type Event struct {
 	AgentRemoved  AgentRemovedEvent  `json:"agent-removed,omitempty"`
 	InvalidAction InvalidActionEvent `json:"invalid-action,omitempty"`
 	RoundStart    RoundStartEvent    `json:"round-start,omitempty"`
+	GameStart     GameStartEvent     `json:"game-start,omitempty"`
 }

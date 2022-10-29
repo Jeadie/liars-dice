@@ -20,8 +20,19 @@ var (
 			}
 			dice := ConvertNumDice(args)
 			round := game.InitRound(dice, 0)
-
 			agents := MakeAgents(uint(len(dice)), humanAgent)
+
+			// GameStartEvent
+			for i, agent := range agents {
+				agent.Handle(game.Event{
+					EType: game.GameStart,
+					GameStart: game.GameStartEvent{
+						NumDicePerAgent: dice,
+						AgentIdx:        i,
+					},
+				})
+			}
+
 			PlayRound(round, agents)
 		},
 	}

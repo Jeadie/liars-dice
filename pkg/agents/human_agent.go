@@ -79,6 +79,10 @@ func (h *HumanAgent) Handle(e game.Event) {
 	case game.RoundStart:
 		h.dice = e.RoundStart.DiceRolled
 		fmt.Printf("Your dice: %d\n", h.dice)
+	case game.GameStart:
+		i := e.GameStart.AgentIdx
+		dice := e.GameStart.NumDicePerAgent
+		fmt.Printf("You are player %d of %d players. Players have the following number of dice %d.\n", i+1, len(dice), dice)
 
 	default:
 		fmt.Printf("Unknown event %s\n", e.EType)
