@@ -83,9 +83,7 @@ func (h *HumanAgent) Handle(e game.Event) {
 		i := e.GameStart.AgentIdx
 		dice := e.GameStart.NumDicePerAgent
 		fmt.Printf("You are player %d of %d players. Players have the following number of dice %d.\n", i+1, len(dice), dice)
-
 	default:
 		fmt.Printf("Unknown event %s\n", e.EType)
 	}
-
 }
