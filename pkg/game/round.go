@@ -66,7 +66,7 @@ func (r *Round) Raise(agent Agent, bet Bet) error {
 		return fmt.Errorf("agent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
 	}
 	if !bet.Raises(r.CurrBet) {
-		return fmt.Errorf("CurrBet %d %ds cannot be played above %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
+		return fmt.Errorf("%d %ds does not raise %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
 	}
 	r.CurrBet = bet
 	r.CurrAgent = Agent((int(r.CurrAgent) + 1) % len(r.Dice))
@@ -154,6 +154,8 @@ func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
 		isAtLeast, err = r.Calls(agent)
 	case Exact:
 		isExactly, err = r.Exact(agent)
+	default:
+		return agent, 0, fmt.Errorf("action, %s, is not valid", action.T)
 	}
 	if err != nil {
 		return 0, 0, err

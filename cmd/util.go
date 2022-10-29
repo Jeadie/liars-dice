@@ -29,6 +29,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 			act := agent.Play(*round)
 			agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
 			for err != nil {
+				fmt.Printf("%s\n", err)
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
@@ -43,6 +44,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				return agentIdx, changeDice
 			}
 		}
+		fmt.Println()
 	}
 	return 0, 0
 }

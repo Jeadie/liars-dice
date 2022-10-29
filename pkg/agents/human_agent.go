@@ -19,8 +19,10 @@ func ConstructHuman() *HumanAgent {
 
 func GetInput() string {
 	fmt.Printf("Your turn >> ")
-	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	return line[:len(line)-1]
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanLines)
+	sc.Scan()
+	return sc.Text()
 }
 
 func (h *HumanAgent) Play(r game.Round) game.Action {
@@ -43,8 +45,11 @@ func (h *HumanAgent) Play(r game.Round) game.Action {
 		}
 
 		b, err := strconv.Atoi(betPts[1])
-		if err != nil || b <= 0 || b > 6 {
-			fmt.Printf("Dice must be within [1, 6]. %s is invalid\n", betPts[0])
+		if err != nil {
+			fmt.Printf("Bet quantity %s is invalid\n", betPts[1])
+			h.Play(r)
+		} else if b <= 0 || b > 6 {
+			fmt.Printf("Dice must be within [1, 6], not %s", betPts[1])
 			h.Play(r)
 		}
 		bet = game.Bet{uint(a), uint(b)}
