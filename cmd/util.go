@@ -40,17 +40,32 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 			act := agent.Play(*round)
 			agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
 			for err != nil {
-				fmt.Printf("%s\n", err)
+				agent.Handle(game.Event{EType: game.InvalidAction, InvalidAction: game.InvalidActionEvent{
+					InvalidAction: act,
+					Err:           err,
+				}})
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
-			fmt.Printf("Player %d %s\n", i, act.ToString())
+			for _, agx := range agents {
+				agx.Handle(game.Event{
+					EType: game.Turn,
+					Turn: game.TurnEvent{
+						Action:      act,
+						ActionAgent: game.Agent(i),
+					},
+				})
+			}
 
 			if changeDice != 0 {
-				if changeDice > 0 {
-					fmt.Printf("Player %d gains %d dice\n", agentIdx, changeDice)
-				} else {
-					fmt.Printf("Player %d loses %d dice(s)\n", agentIdx, -1*changeDice)
+				for _, agx := range agents {
+					agx.Handle(game.Event{
+						EType: game.RoundComplete,
+						RoundComplete: game.RoundCompleteEvent{
+							AffectedAgent: agentIdx,
+							ChangeInDice:  changeDice,
+						},
+					})
 				}
 				return agentIdx, changeDice
 			}
