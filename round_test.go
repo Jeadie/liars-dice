@@ -112,7 +112,3 @@ func TestRound_Exact(t *testing.T) {
 		t.Errorf("exact on %v should be unsuccessful. One already used in round", r)
 	}
 }
-
-func TestRound_Raise(t *testing.T) {
-
-}
