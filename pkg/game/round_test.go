@@ -1,4 +1,4 @@
-package liars_dice
+package game
 
 import "testing"
 

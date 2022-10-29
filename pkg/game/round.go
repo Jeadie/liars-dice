@@ -1,4 +1,4 @@
-package liars_dice
+package game
 
 import (
 	"fmt"
@@ -17,8 +17,20 @@ const (
 
 type Action struct {
 	T     ActionType `json:"T"`
-	Agent Agent      `json:"Agent"`
 	Raise Bet        `json:"Raise,omitempty"`
+}
+
+func (a Action) ToString() string {
+	switch a.T {
+	case Raise:
+		return fmt.Sprintf("raises to %d %ds", a.Raise[0], a.Raise[1])
+	case Call:
+		return fmt.Sprintf("calls out current bet")
+	case Exact:
+		return fmt.Sprintf("calls out exactly the current bet")
+	default:
+		return ""
+	}
 }
 
 type Round struct {
@@ -29,7 +41,7 @@ type Round struct {
 }
 
 // Raises returns true if the Bet, b can raise the Bet c. A Bet can raise another
-// if it calls a higher quanity, zeroth index, or an equal quantity of a higher
+// if it calls a higher quantity, zeroth index, or an equal quantity of a higher
 // value, first index. E.g.
 //
 //	(4, 2) raise (3, 2)
@@ -43,7 +55,7 @@ func (b Bet) Raises(c Bet) bool {
 // raise (CurrAgent.e. it's not their turn), or the raise is not valid given the state of the round.
 func (r *Round) Raise(agent Agent, bet Bet) error {
 	if r.CurrAgent != agent {
-		return fmt.Errorf("Agent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
+		return fmt.Errorf("gent %d cannot Raise. It is Agent %d's turn", agent, r.CurrAgent)
 	}
 	if !bet.Raises(r.CurrBet) {
 		return fmt.Errorf("CurrBet %d %ds cannot be played above %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
@@ -58,7 +70,7 @@ func (r *Round) Raise(agent Agent, bet Bet) error {
 // Error if Agent cannot currently make an Exact call.
 func (r *Round) Exact(agent Agent) (bool, error) {
 	if r.CurrAgent != agent {
-		return false, fmt.Errorf("Agent %d cannot Exact. It is Agent %d's turn", agent, r.CurrAgent)
+		return false, fmt.Errorf("agent %d cannot Exact. It is Agent %d's turn", agent, r.CurrAgent)
 	}
 	q, v := r.CurrBet[0], r.CurrBet[1]
 	tot := uint(0)
@@ -73,10 +85,10 @@ func (r *Round) Exact(agent Agent) (bool, error) {
 }
 
 // Calls called by an Agent returns true iff the current CurrBet is greater than or equal to the state
-// of the Dice. Error if Agent cannot currently make an Calls.
+// of the Dice. Error if Agent cannot currently make a Calls.
 func (r *Round) Calls(agent Agent) (bool, error) {
 	if r.CurrAgent != agent {
-		return false, fmt.Errorf("Agent %d cannot Call. It is Agent %d's turn", agent, r.CurrAgent)
+		return false, fmt.Errorf("agent %d cannot Call. It is Agent %d's turn", agent, r.CurrAgent)
 	}
 	q, v := r.CurrBet[0], r.CurrBet[1]
 	tot := uint(0)
@@ -120,43 +132,41 @@ func InitDice(numDice []uint) [][]uint {
 	return dice
 }
 
-// PlayRound of liar's Dice. Returns the new number of Dice for the next round.
-func PlayRound(r Round, actions chan Action, errs chan error) []uint {
-	var err error
+// PlayTurn on a board. Returns the number of dice an Agent should gain/lose after that turn. An
+// error is returned if the action cannot be played at this stage of the round.
+func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
 	var correct bool
+	var err error
 
-	dice := r.GetDicePerAgent()
-	for action := range actions {
-		switch action.T {
-		case Raise:
-			err = r.Raise(action.Agent, action.Raise)
-		case Call:
-			correct, err = r.Calls(action.Agent)
-		case Exact:
-			correct, err = r.Exact(action.Agent)
-		}
-		if err != nil {
-			errs <- err
-			continue
-		}
-		if action.T == Raise {
-			continue
-		}
-
-		// Round finished. determine outcome.
-		if action.T == Call {
-			losingAgent := r.CurrAgent
-			if correct {
-				losingAgent = Agent((int(r.CurrAgent) - 1) % len(r.Dice))
-			}
-			dice[losingAgent]--
-			break
-		} else if action.T == Exact {
-			if correct {
-				dice[r.CurrAgent] += 2
-			}
-			break
-		}
+	switch action.T {
+	case Raise:
+		err = r.Raise(agent, action.Raise)
+	case Call:
+		correct, err = r.Calls(agent)
+	case Exact:
+		correct, err = r.Exact(agent)
 	}
-	return dice
+	if err != nil {
+		return 0, 0, err
+	}
+
+	if action.T == Raise {
+		return 0, 0, nil
+	}
+
+	// Round finished. determine outcome.
+	if action.T == Call {
+		losingAgent := r.CurrAgent
+		if correct {
+			losingAgent = Agent((int(r.CurrAgent) - 1) % len(r.Dice))
+		}
+		return losingAgent, -1, nil
+
+	} else if action.T == Exact {
+		if correct {
+			return r.CurrAgent, 1, nil
+		}
+		return r.CurrAgent, -2, nil
+	}
+	return 0, 0, fmt.Errorf("an unrecognisable error occurred")
 }
