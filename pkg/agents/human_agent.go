@@ -61,8 +61,31 @@ func (h *HumanAgent) Play(r game.Round) game.Action {
 	}
 }
 
+func (h *HumanAgent) Handle(e game.Event) {
+	switch e.EType {
+	case game.Turn:
+		fmt.Printf("Player %d %s\n", e.Turn.ActionAgent, e.Turn.Action.ToString())
+	case game.RoundComplete:
+		agentIdx, changeDice := e.RoundComplete.AffectedAgent, e.RoundComplete.ChangeInDice
+		if changeDice > 0 {
+			fmt.Printf("Player %d gains %d dice\n", agentIdx, changeDice)
+		} else {
+			fmt.Printf("Player %d loses %d dice(s)\n", agentIdx, -1*changeDice)
+		}
+	case game.AgentRemoved:
+		fmt.Printf("Player %d has been eliminated\n", e.AgentRemoved.AffectedAgent)
+	case game.InvalidAction:
+		fmt.Printf("%s\n", e.InvalidAction.Err)
+	case game.RoundStart:
+		h.dice = e.RoundStart.DiceRolled
+		fmt.Printf("Your dice: %d\n", h.dice)
+
+	default:
+		fmt.Printf("Unknown event %s\n", e.EType)
+	}
+
+}
+
 func (h *HumanAgent) Initialise(r game.Round, dice []uint) {
-	h.dice = dice
-	fmt.Printf("Your dice: %d\n", h.dice)
 
 }
