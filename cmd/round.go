@@ -10,23 +10,22 @@ import (
 )
 
 var (
-	numDice    []string
 	humanAgent uint
 	roundCmd   = &cobra.Command{
 		Use:   "round",
 		Short: "Play a round of Liar's dice",
 		Long:  `Play a round of Liar's dice`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if humanAgent >= uint(len(numDice)) {
-				fmt.Printf("for a round with dice %s per player, 0 <= idx < %d", numDice, len(numDice))
+			if humanAgent >= uint(len(args)) {
+				fmt.Printf("for a round with dice %s per player, 0 <= idx < %d", args, len(args))
 				os.Exit(1)
 			}
-			dice := ConvertNumDice(numDice)
+			dice := ConvertNumDice(args)
 			round := liars_dice.InitRound(dice, 0)
 
 			// Create and initialise agents
-			agents := make([]agents2.Agent, len(numDice))
-			for i := 0; i < len(numDice); i++ {
+			agents := make([]agents2.Agent, len(dice))
+			for i := 0; i < len(dice); i++ {
 				if uint(i) == humanAgent {
 					agents[i] = agents2.ConstructHuman()
 				} else {
@@ -39,8 +38,8 @@ var (
 			for true {
 				for i, agent := range agents {
 					act := agent.Play(*round)
+					fmt.Printf("Player %d %s\n", i, act.ToString())
 					agent, changeDice, err := round.PlayTurn(liars_dice.Agent(i), act)
-					fmt.Printf("Player %d %s\n", agent, act.ToString())
 
 					if err != nil {
 						return
@@ -48,10 +47,11 @@ var (
 
 					if changeDice != 0 {
 						if changeDice > 0 {
-							fmt.Printf("Player %d gains %d dice", agent, changeDice)
+							fmt.Printf("Player %d gains %d dice\n", agent, changeDice)
 						} else {
-							fmt.Printf("Player %d loses %d dice(s)", agent, -1*changeDice)
+							fmt.Printf("Player %d loses %d dice(s)\n", agent, -1*changeDice)
 						}
+						os.Exit(0)
 					}
 				}
 			}
@@ -74,6 +74,6 @@ func ConvertNumDice(numDice []string) []uint {
 
 func init() {
 	rootCmd.AddCommand(roundCmd)
-	roundCmd.PersistentFlags().StringArrayVar(&numDice, "dice", []string{"5", "5", "5"}, "The number of dice each player has. Also determines the number of players.")
+	//roundCmd.PersistentFlags().StringArrayVar(&numDice, "dice", []string{"5", "5", "5"}, "The number of dice each player has. Also determines the number of players.")
 	roundCmd.PersistentFlags().UintVar(&humanAgent, "idx", 0, "The index of the user in the order of players.")
 }

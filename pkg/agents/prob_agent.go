@@ -10,15 +10,17 @@ func ConstructProbAgent() *ProbAgent {
 }
 
 func (h *ProbAgent) Play(r game.Round) game.Action {
+	q, v := r.CurrBet[0], r.CurrBet[1]
+
 	if r.CurrBet[1] == 6 {
 		return game.Action{
 			T:     game.Raise,
-			Raise: game.Bet{r.CurrBet[0] + 1, 1},
+			Raise: game.Bet{q + 1, 1},
 		}
 	} else {
 		return game.Action{
 			T:     game.Raise,
-			Raise: game.Bet{r.CurrBet[0], r.CurrBet[1] + 1},
+			Raise: game.Bet{q, v + 1},
 		}
 	}
 }
