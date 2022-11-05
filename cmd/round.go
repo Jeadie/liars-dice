@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	humanAgent uint
-	roundCmd   = &cobra.Command{
+	roundCmd = &cobra.Command{
 		Use:   "round",
 		Short: "Play a round of Liar's dice",
 		Long:  `Play a round of Liar's dice`,

@@ -8,11 +8,16 @@ import (
 	"strconv"
 )
 
-func MakeAgents(n uint, humanIdx uint) []agents2.Agent {
+func MakeAgents(n uint, humanIdx uint, wsAgents chan agents2.WsAgent, numWsAgents uint) []agents2.Agent {
 	agents := make([]agents2.Agent, n)
 	for i := uint(0); i < n; i++ {
 		if i == humanIdx {
 			agents[i] = agents2.ConstructHuman()
+
+		} else if numWsAgents > 0 {
+			numWsAgents--
+			x := <-wsAgents
+			agents[i] = &x
 		} else {
 			agents[i] = agents2.ConstructProbAgent()
 		}
