@@ -43,10 +43,10 @@ type Event struct {
 	EType EventType `json:"type"`
 
 	// Present based on EventType
-	Turn          TurnEvent          `json:"turn,omitempty"`
-	RoundComplete RoundCompleteEvent `json:"round-complete,omitempty"`
-	AgentRemoved  AgentRemovedEvent  `json:"agent-removed,omitempty"`
-	InvalidAction InvalidActionEvent `json:"invalid-action,omitempty"`
-	RoundStart    RoundStartEvent    `json:"round-start,omitempty"`
-	GameStart     GameStartEvent     `json:"game-start,omitempty"`
+	Turn          *TurnEvent          `json:"turn,omitempty"`
+	RoundComplete *RoundCompleteEvent `json:"round-complete,omitempty"`
+	AgentRemoved  *AgentRemovedEvent  `json:"agent-removed,omitempty"`
+	InvalidAction *InvalidActionEvent `json:"invalid-action,omitempty"`
+	RoundStart    *RoundStartEvent    `json:"round-start,omitempty"`
+	GameStart     *GameStartEvent     `json:"game-start,omitempty"`
 }

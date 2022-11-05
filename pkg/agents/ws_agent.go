@@ -19,7 +19,6 @@ func ConstructWsAgents(addr string, numAgents uint) chan WsAgent {
 	result := make(chan WsAgent, numAgents)
 	aSrvr := agentServer{wsChan: result}
 	server := http.Server{Addr: addr, Handler: &aSrvr}
-
 	go server.ListenAndServe()
 
 	return result
@@ -107,7 +106,7 @@ func (agent *WsAgent) Handle(e game.Event) {
 	if err != nil {
 		fmt.Println("Could not marshal Event: ", e, err)
 	}
-	err = agent.conn.WriteMessage(0, data)
+	err = agent.conn.WriteMessage(1, data)
 	if err != nil {
 		fmt.Println("Could not send Event: ", e, err)
 	}

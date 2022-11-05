@@ -29,7 +29,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 	for i, agent := range agents {
 		agent.Handle(game.Event{
 			EType: game.RoundStart,
-			RoundStart: game.RoundStartEvent{
+			RoundStart: &game.RoundStartEvent{
 				DiceRolled: round.Dice[i],
 			},
 		})
@@ -45,7 +45,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 			act := agent.Play(*round)
 			agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
 			for err != nil {
-				agent.Handle(game.Event{EType: game.InvalidAction, InvalidAction: game.InvalidActionEvent{
+				agent.Handle(game.Event{EType: game.InvalidAction, InvalidAction: &game.InvalidActionEvent{
 					InvalidAction: act,
 					Err:           err,
 				}})
@@ -55,7 +55,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 			for _, agx := range agents {
 				agx.Handle(game.Event{
 					EType: game.Turn,
-					Turn: game.TurnEvent{
+					Turn: &game.TurnEvent{
 						Action:      act,
 						ActionAgent: game.Agent(i),
 					},
@@ -66,7 +66,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				for _, agx := range agents {
 					agx.Handle(game.Event{
 						EType: game.RoundComplete,
-						RoundComplete: game.RoundCompleteEvent{
+						RoundComplete: &game.RoundCompleteEvent{
 							AffectedAgent: agentIdx,
 							ChangeInDice:  changeDice,
 						},

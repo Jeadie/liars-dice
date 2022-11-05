@@ -34,7 +34,7 @@ var (
 			for i, agent := range agents {
 				agent.Handle(game.Event{
 					EType: game.GameStart,
-					GameStart: game.GameStartEvent{
+					GameStart: &game.GameStartEvent{
 						NumDicePerAgent: dice,
 						AgentIdx:        i,
 					},

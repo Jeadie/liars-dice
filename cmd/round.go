@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	agents2 "github.com/Jeadie/liars-poker/pkg/agents"
 	"github.com/Jeadie/liars-poker/pkg/game"
 	"github.com/spf13/cobra"
 	"os"
@@ -19,13 +20,13 @@ var (
 			}
 			dice := ConvertNumDice(args)
 			round := game.InitRound(dice, 0)
-			agents := MakeAgents(uint(len(dice)), humanAgent)
+			agents := MakeAgents(uint(len(dice)), humanAgent, agents2.ConstructWsAgents(wsAddr, socketAgents), socketAgents)
 
 			// GameStartEvent
 			for i, agent := range agents {
 				agent.Handle(game.Event{
 					EType: game.GameStart,
-					GameStart: game.GameStartEvent{
+					GameStart: &game.GameStartEvent{
 						NumDicePerAgent: dice,
 						AgentIdx:        i,
 					},
