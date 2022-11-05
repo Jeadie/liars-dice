@@ -3,7 +3,7 @@ package agents
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Jeadie/liars-poker/pkg/game"
+	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"

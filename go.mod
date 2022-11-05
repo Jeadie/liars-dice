@@ -1,4 +1,4 @@
-module github.com/Jeadie/liars-poker
+module github.com/Jeadie/liars-dice
 
 go 1.19
 

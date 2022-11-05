@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	agents2 "github.com/Jeadie/liars-poker/pkg/agents"
-	"github.com/Jeadie/liars-poker/pkg/game"
+	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
+	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/spf13/cobra"
 	"os"
 )

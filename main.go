@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Jeadie/liars-poker/cmd"
+import "github.com/Jeadie/liars-dice/cmd"
 
 func main() {
 	cmd.Execute()

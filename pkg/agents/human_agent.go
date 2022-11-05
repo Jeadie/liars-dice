@@ -3,7 +3,7 @@ package agents
 import (
 	"bufio"
 	"fmt"
-	"github.com/Jeadie/liars-poker/pkg/game"
+	"github.com/Jeadie/liars-dice/pkg/game"
 	"os"
 	"strconv"
 	"strings"
