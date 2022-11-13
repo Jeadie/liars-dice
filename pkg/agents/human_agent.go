@@ -78,6 +78,7 @@ func (h *HumanAgent) Handle(e game.Event) {
 		fmt.Printf("%s\n", e.InvalidAction.Err)
 	case game.RoundStart:
 		h.dice = e.RoundStart.DiceRolled
+		fmt.Printf("\n-- New Round -- \n")
 		fmt.Printf("Your dice: %d\n", h.dice)
 	case game.GameStart:
 		i := e.GameStart.AgentIdx
