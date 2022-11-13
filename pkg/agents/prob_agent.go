@@ -109,6 +109,9 @@ func (h *ProbAgent) Handle(e game.Event) {
 		// Do not expect to receive invalid Actions.
 		break
 
+	case game.AgentTurn:
+		break
+
 	case game.RoundStart:
 		h.roundDice = e.RoundStart.DiceRolled
 

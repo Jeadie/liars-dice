@@ -43,6 +43,13 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 	// Consecutive agent's turn
 	for true {
 		for i, agent := range agents {
+			e := game.Event{
+				EType:     game.AgentTurn,
+				AgentTurn: &game.AgentTurnEvent{},
+			}
+			agent.Handle(e)
+			log.Debug().Interface("event", e).Send()
+
 			// Ignore evicted players
 			if len(round.Dice[i]) == 0 {
 				continue
@@ -59,7 +66,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
-			e := game.Event{
+			e = game.Event{
 				EType: game.Turn,
 				Turn: &game.TurnEvent{
 					Action:      act,

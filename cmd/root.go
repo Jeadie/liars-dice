@@ -60,7 +60,18 @@ var (
 				winnerIdx, hasWon = WinningPlayer(dice)
 				round = game.InitRound(dice, 0)
 			}
-			fmt.Printf("\n Player %d wins!\n", winnerIdx)
+
+			// GameCompleteEvent
+			for _, agent := range agents {
+				e := game.Event{
+					EType: game.GameComplete,
+					GameComplete: &game.GameCompleteEvent{
+						Winner: game.Agent(winnerIdx),
+					},
+				}
+				agent.Handle(e)
+				log.Debug().Interface("event", e).Send()
+			}
 		},
 	}
 )
