@@ -28,16 +28,7 @@ func MakeAgents(n uint, humanIdx int, wsAgents chan *agents2.WsAgent, numWsAgent
 }
 
 func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
-	for i, agent := range agents {
-		e := game.Event{
-			EType: game.RoundStart,
-			RoundStart: &game.RoundStartEvent{
-				DiceRolled: round.Dice[i],
-			},
-		}
-		agent.Handle(e)
-		log.Debug().Interface("event", e).Send()
-	}
+	game.SendRoundStarted(agents, *round)
 
 	// TODO: Rotate who starts.
 	// Consecutive agent's turn
@@ -66,29 +57,10 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
-			e = game.Event{
-				EType: game.Turn,
-				Turn: &game.TurnEvent{
-					Action:      act,
-					ActionAgent: game.Agent(i),
-				},
-			}
-			log.Debug().Interface("event", e).Send()
-			for _, agx := range agents {
-				agx.Handle(e)
-			}
+			game.SendTurnEvent(agents, act, game.Agent(i))
 
 			if changeDice != 0 {
-				event := game.Event{
-					EType: game.RoundComplete,
-					RoundComplete: &game.RoundCompleteEvent{
-						AffectedAgent: agentIdx,
-						ChangeInDice:  changeDice,
-					},
-				}
-				for _, agx := range agents {
-					agx.Handle(event)
-				}
+				game.SendRoundComplete(agents, agentIdx, changeDice)
 				return agentIdx, changeDice
 			}
 		}
@@ -110,15 +82,15 @@ func ConvertNumDice(numDice []string) []uint {
 }
 
 // WinningPlayer finds and, if exists, returns the index of the winning player (and whether there was a winning player).
-func WinningPlayer(d []uint) (uint, bool) {
-	var winner uint
+func WinningPlayer(d []uint) (game.Agent, bool) {
+	var winner game.Agent
 	tot := uint(0)
 	winnersDice := uint(0)
 
 	for i, u := range d {
 		tot += u
 		if u != 0 {
-			winner = uint(i)
+			winner = game.Agent(i)
 			winnersDice = u
 		}
 	}
