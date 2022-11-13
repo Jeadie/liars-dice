@@ -4,7 +4,7 @@ A simple game of liar's dice for human, computer and AI.
 ## Usage
 First install
 ```shell
-  go install github.com/Jeadie/liars-dice
+  go install github.com/Jeadie/liars-dice@latest
 ```
 To play a simple game, two users starting with three dice each, against algorithmic opponents:
 ```shell
