@@ -35,6 +35,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 		})
 	}
 
+	// TODO: Rotate who starts.
 	// Consecutive agent's turn
 	for true {
 		for i, agent := range agents {
