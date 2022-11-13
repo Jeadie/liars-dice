@@ -22,7 +22,7 @@ var (
 			round := game.InitRound(dice, 0)
 			agents := MakeAgents(uint(len(dice)), humanAgent, agents2.ConstructWsAgents(wsAddr, socketAgents), socketAgents)
 
-			game.SendGameStarted(agents, dice)
+			agents2.SendGameStarted(agents, dice)
 			PlayRound(round, agents)
 		},
 	}

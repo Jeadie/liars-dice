@@ -28,7 +28,7 @@ func MakeAgents(n uint, humanIdx int, wsAgents chan *agents2.WsAgent, numWsAgent
 }
 
 func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
-	game.SendRoundStarted(agents, *round)
+	agents2.SendRoundStarted(agents, *round)
 
 	// TODO: Rotate who starts.
 	// Consecutive agent's turn
@@ -57,10 +57,10 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
-			game.SendTurnEvent(agents, act, game.Agent(i))
+			agents2.SendTurnEvent(agents, act, game.Agent(i))
 
 			if changeDice != 0 {
-				game.SendRoundComplete(agents, agentIdx, changeDice)
+				agents2.SendRoundComplete(agents, agentIdx, changeDice)
 				return agentIdx, changeDice
 			}
 		}
