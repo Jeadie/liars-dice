@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/gorilla/websocket"
-	"log"
+	"github.com/rs/zerolog/log"
 	"net/url"
 	"os"
 )
@@ -13,22 +13,21 @@ func handleIncomingEvents(c *websocket.Conn, output chan game.Event) {
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
-			log.Println("read:", err)
+			log.Warn().Err(err).Msg("Failed to read message from ws socket.")
 			return
 		}
 		var event game.Event
 		err = json.Unmarshal(message, &event)
 		if err != nil {
-			log.Println("Error parsing message: ", err)
+			log.Warn().Err(err).Bytes("rawPkt", message).Msg("Invalid payload received from websocket client.")
 			break
 		}
+		log.Debug().Interface("recv_msg", event)
 		output <- event
-		log.Println("recv: ", event)
 	}
 }
 func ConnectToServer(addr string) (*websocket.Conn, error) {
 	u := url.URL{Scheme: "ws", Host: addr, Path: "/"}
-	log.Printf("connecting to %s", u.String())
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	return c, err
 }
@@ -47,7 +46,7 @@ func Handle(c *websocket.Conn, incoming chan game.Event, outgoing chan game.Acti
 		case act := <-outgoing:
 			err := sendAction(c, act)
 			if err != nil {
-				log.Println("write:", err)
+				log.Warn().Err(err).Msg("Failed to write message to ws socket.")
 				return
 			}
 		}
@@ -55,6 +54,7 @@ func Handle(c *websocket.Conn, incoming chan game.Event, outgoing chan game.Acti
 }
 
 func sendAction(conn *websocket.Conn, act game.Action) error {
+	log.Debug().Interface("event", act).Msg("sending to server")
 	v, err := json.Marshal(act)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func sendAction(conn *websocket.Conn, act game.Action) error {
 func CloseConn(c *websocket.Conn) {
 	err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		log.Println("write close:", err)
+		log.Warn().Err(err).Msg("Failed to close websocket connection normally.")
 		return
 	}
 	// TODO: handle CloseMessage response from server.

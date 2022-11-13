@@ -5,6 +5,7 @@ import (
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
 	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -34,13 +35,15 @@ var (
 
 			// GameStartEvent
 			for i, agent := range agents {
-				agent.Handle(game.Event{
+				e := game.Event{
 					EType: game.GameStart,
 					GameStart: &game.GameStartEvent{
 						NumDicePerAgent: dice,
 						AgentIdx:        i,
 					},
-				})
+				}
+				agent.Handle(e)
+				log.Debug().Interface("event", e).Send()
 			}
 
 			winnerIdx, hasWon := WinningPlayer(dice)
@@ -63,7 +66,7 @@ var (
 )
 
 func initConfig() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixNano
 	level, err := zerolog.ParseLevel(logLevel)
 	if err != nil {
 		rootCmd.PrintErr(err)
@@ -77,7 +80,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&humanAgent, "idx", -1, "The index of the user in the order of players. Default to -1; no human user.")
 	rootCmd.PersistentFlags().StringVar(&wsAddr, "ws-addr", "", "The network address to wait for users communicating over web sockets.")
 	rootCmd.PersistentFlags().UintVar(&socketAgents, "ws-agents", 0, "The number of users to wait for, over websocket, to play in the game.")
-	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", zerolog.InfoLevel.String(), "Level of logging to stderr. Levels: trace, debug, info, warn, error, fatal, panic")
+	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", zerolog.DebugLevel.String(), "Level of logging to stderr. Levels: trace, debug, info, warn, error, fatal, panic")
 
 }
 

@@ -170,7 +170,7 @@ func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
 		if isAtLeast {
 			return r.CurrAgent, -1, nil
 		} else {
-			return Agent(mod(int(r.CurrAgent)-1, len(r.Dice))), -1, nil
+			return Agent(Mod(int(r.CurrAgent)-1, len(r.Dice))), -1, nil
 		}
 	} else if action.T == Exact {
 		if isExactly {
@@ -181,7 +181,7 @@ func (r *Round) PlayTurn(agent Agent, action Action) (Agent, int, error) {
 	return 0, 0, fmt.Errorf("an unrecognisable error occurred")
 }
 
-func mod(x, m int) int {
+func Mod(x, m int) int {
 	y := x % m
 	if y < 0 {
 		return y + m

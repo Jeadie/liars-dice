@@ -18,7 +18,7 @@ type GameStartEvent struct {
 
 type InvalidActionEvent struct {
 	InvalidAction Action
-	Err           error
+	Err           string
 }
 
 type RoundStartEvent struct {

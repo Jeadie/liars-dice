@@ -2,21 +2,20 @@ package agents
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/gorilla/websocket"
-	"log"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
 )
 
 type agentServer struct {
-	wsChan chan WsAgent
+	wsChan chan *WsAgent
 }
 
 // ConstructWsAgents by starting a server on `addr` and then upgrading the connection to a websocket.
-func ConstructWsAgents(addr string, numAgents uint) chan WsAgent {
-	result := make(chan WsAgent, numAgents)
+func ConstructWsAgents(addr string, numAgents uint) chan *WsAgent {
+	result := make(chan *WsAgent, numAgents)
 	aSrvr := agentServer{wsChan: result}
 	server := http.Server{Addr: addr, Handler: &aSrvr}
 	go server.ListenAndServe()
@@ -25,29 +24,27 @@ func ConstructWsAgents(addr string, numAgents uint) chan WsAgent {
 }
 
 func (aSrvr *agentServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Debug().Msg("Received HTTP request")
 	u := websocket.Upgrader{}
 	conn, err := u.Upgrade(w, r, nil)
+	log.Debug().Msg("Upgrading connection to ws success")
 
 	if err != nil {
-		log.Print("Error during upgrading:", err)
+		log.Warn().Err(err).Msg("error occurred when upgrading connection from HTTP to websocket ")
 		return
 	}
 
-	aSrvr.wsChan <- WsAgent{
+	agent := &WsAgent{
 		conn:     conn,
-		commands: make([]game.Action, 1),
+		commands: make([]game.Action, 0),
 	}
+	go agent.listenForCommands()
+	aSrvr.wsChan <- agent
 }
 
 type WsAgent struct {
 	conn     *websocket.Conn
 	commands []game.Action // Returned from the websocket.
-}
-
-// ConstructWsAgent by starting a server on `addr` and then upgrading the connection to a websocket.
-func ConstructWsAgent(addr string) *WsAgent {
-	x := <-ConstructWsAgents(addr, 1)
-	return &x
 }
 
 // listenForCommands from the websocket connection. Store locally for use when invoked.
@@ -56,7 +53,7 @@ func (agent *WsAgent) listenForCommands() {
 		// Get ws message
 		_, message, err := agent.conn.ReadMessage()
 		if err != nil {
-			log.Println("Error during message reading:", err)
+			log.Warn().Err(err).Msg("Error reading game.Action from agent")
 			break
 		}
 
@@ -64,10 +61,10 @@ func (agent *WsAgent) listenForCommands() {
 		var act game.Action
 		err = json.Unmarshal(message, &act)
 		if err != nil {
-			log.Println("Error parsing message: ", err)
+			log.Warn().Err(err).Bytes("rawPkt", message).Msg("failed to unmarshal message to game.action")
 			break
 		}
-
+		log.Debug().Interface("received action", act).Msg("GOt one")
 		// Append to command queue. Will be used by agent.Play()
 		agent.commands = append(agent.commands, act)
 	}
@@ -76,7 +73,6 @@ func (agent *WsAgent) listenForCommands() {
 // Play Action received via websocket.
 func (agent *WsAgent) Play(r game.Round) game.Action {
 	var act game.Action
-
 	// Can play immediately from local cache.
 	if len(agent.commands) > 0 {
 		act = agent.commands[0]
@@ -91,12 +87,14 @@ func (agent *WsAgent) Play(r game.Round) game.Action {
 	} else {
 		// Wait for response from ws (polling in goroutine)
 		for len(agent.commands) == 0 {
+			log.Debug().Int("commands", len(agent.commands)).Msg("waiting for action from agent")
 			time.Sleep(time.Second)
 		}
 
 		// Call recursive to not reimplement local cache logic.
-		agent.Play(r)
+		act = agent.Play(r)
 	}
+	log.Debug().Interface("action", act).Msg("Playing agent's action")
 	return act
 }
 
@@ -104,10 +102,10 @@ func (agent *WsAgent) Play(r game.Round) game.Action {
 func (agent *WsAgent) Handle(e game.Event) {
 	data, err := json.Marshal(e)
 	if err != nil {
-		fmt.Println("Could not marshal Event: ", e, err)
+		log.Warn().Interface("event", e).Err(err).Msg("Could not marshal Event")
 	}
 	err = agent.conn.WriteMessage(1, data)
 	if err != nil {
-		fmt.Println("Could not send Event: ", e, err)
+		log.Warn().Interface("event", e).Err(err).Msg("Could not send Event")
 	}
 }
