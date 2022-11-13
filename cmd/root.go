@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	humanAgent   uint
+	humanAgent   int
 	socketAgents uint
 	wsAddr       string
 	rootCmd      = &cobra.Command{
@@ -17,7 +17,7 @@ var (
 		Short: "Play a liar's dice",
 		Long:  `Play a liar's dice`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if humanAgent >= uint(len(args)) {
+			if humanAgent >= len(args) {
 				fmt.Printf("for a round with dice %s per player, 0 <= idx < %d\n", args, len(args))
 				os.Exit(1)
 			}
@@ -62,7 +62,7 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().UintVar(&humanAgent, "idx", 0, "The index of the user in the order of players.")
+	rootCmd.PersistentFlags().IntVar(&humanAgent, "idx", -1, "The index of the user in the order of players. Default to -1; no human user.")
 	rootCmd.PersistentFlags().StringVar(&wsAddr, "ws-addr", "", "The network address to wait for users communicating over web sockets.")
 	rootCmd.PersistentFlags().UintVar(&socketAgents, "ws-agents", 0, "The number of users to wait for, over websocket, to play in the game.")
 }

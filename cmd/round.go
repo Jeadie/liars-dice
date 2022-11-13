@@ -14,7 +14,7 @@ var (
 		Short: "Play a round of Liar's dice",
 		Long:  `Play a round of Liar's dice`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if humanAgent >= uint(len(args)) {
+			if humanAgent >= len(args) {
 				fmt.Printf("for a round with dice %s per player, 0 <= idx < %d\n", args, len(args))
 				os.Exit(1)
 			}

@@ -8,9 +8,10 @@ import (
 	"strconv"
 )
 
-func MakeAgents(n uint, humanIdx uint, wsAgents chan agents2.WsAgent, numWsAgents uint) []agents2.Agent {
+func MakeAgents(n uint, humanIdx int, wsAgents chan agents2.WsAgent, numWsAgents uint) []agents2.Agent {
 	agents := make([]agents2.Agent, n)
-	for i := uint(0); i < n; i++ {
+	for i := 0; i < int(n); i++ {
+		// If humanIdx == -1, no human agent is used.
 		if i == humanIdx {
 			agents[i] = agents2.ConstructHuman()
 
