@@ -17,7 +17,7 @@ func SendGameStarted(agents []Agent, dice []uint) {
 		}
 		agent.Handle(e)
 	}
-	e.GameStart.AgentIdx = -1
+	//e.GameStart.AgentIdx = -1
 	log.Debug().Interface("event", e).Send()
 }
 
@@ -60,7 +60,7 @@ func SendRoundStarted(agents []Agent, r game.Round) {
 		}
 		agent.Handle(e)
 	}
-	e.RoundStart.DiceRolled = nil
+	//e.RoundStart.DiceRolled = nil
 	log.Debug().Interface("event", e).Send()
 }
 
