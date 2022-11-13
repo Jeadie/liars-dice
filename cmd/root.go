@@ -45,7 +45,6 @@ var (
 
 			winnerIdx, hasWon := WinningPlayer(dice)
 			for !hasWon {
-				fmt.Printf("\n-- New Round -- \n")
 				agentIdx, change := PlayRound(round, agents)
 
 				// Changes score from last game.

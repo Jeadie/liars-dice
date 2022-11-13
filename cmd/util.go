@@ -36,7 +36,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 			},
 		}
 		agent.Handle(e)
-		log.Debug().Interface("event", e).Str("eventType", string(game.RoundStart)).Send()
+		log.Debug().Interface("event", e).Send()
 	}
 
 	// TODO: Rotate who starts.
@@ -55,7 +55,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 					Err:           err,
 				}}
 				agent.Handle(e)
-				log.Debug().Interface("event", e).Str("eventType", string(game.InvalidAction)).Send()
+				log.Debug().Interface("event", e).Send()
 				act := agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
@@ -66,7 +66,7 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 					ActionAgent: game.Agent(i),
 				},
 			}
-			log.Debug().Interface("event", e).Str("eventType", string(game.Turn)).Send()
+			log.Debug().Interface("event", e).Send()
 			for _, agx := range agents {
 				agx.Handle(e)
 			}
@@ -85,7 +85,6 @@ func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 				return agentIdx, changeDice
 			}
 		}
-		fmt.Println()
 	}
 	return 0, 0
 }

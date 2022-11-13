@@ -31,7 +31,7 @@ var (
 						AgentIdx:        i,
 					},
 				}
-				log.Debug().Interface("event", e).Str("eventType", string(game.Turn)).Send()
+				log.Debug().Interface("event", e).Send()
 				agent.Handle(e)
 			}
 
