@@ -4,6 +4,7 @@ import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
 	"github.com/Jeadie/liars-dice/pkg/game"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -12,6 +13,7 @@ var (
 	humanAgent   int
 	socketAgents uint
 	wsAddr       string
+	logLevel     string
 	rootCmd      = &cobra.Command{
 		Use:   "game",
 		Short: "Play a liar's dice",
@@ -61,10 +63,23 @@ var (
 	}
 )
 
+func initConfig() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	level, err := zerolog.ParseLevel(logLevel)
+	if err != nil {
+		rootCmd.PrintErr(err)
+		os.Exit(1)
+	}
+	zerolog.SetGlobalLevel(level)
+}
+
 func init() {
+	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().IntVar(&humanAgent, "idx", -1, "The index of the user in the order of players. Default to -1; no human user.")
 	rootCmd.PersistentFlags().StringVar(&wsAddr, "ws-addr", "", "The network address to wait for users communicating over web sockets.")
 	rootCmd.PersistentFlags().UintVar(&socketAgents, "ws-agents", 0, "The number of users to wait for, over websocket, to play in the game.")
+	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", zerolog.InfoLevel.String(), "Level of logging to stderr. Levels: trace, debug, info, warn, error, fatal, panic")
+
 }
 
 func Execute() {

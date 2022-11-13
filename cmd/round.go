@@ -4,6 +4,7 @@ import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
 	"github.com/Jeadie/liars-dice/pkg/game"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -24,13 +25,14 @@ var (
 
 			// GameStartEvent
 			for i, agent := range agents {
-				agent.Handle(game.Event{
-					EType: game.GameStart,
-					GameStart: &game.GameStartEvent{
+				e := game.Event{
+					EType: game.GameStart, GameStart: &game.GameStartEvent{
 						NumDicePerAgent: dice,
 						AgentIdx:        i,
 					},
-				})
+				}
+				log.Debug().Interface("event", e).Str("eventType", string(game.Turn)).Send()
+				agent.Handle(e)
 			}
 
 			PlayRound(round, agents)
