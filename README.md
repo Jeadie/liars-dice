@@ -14,6 +14,7 @@ A simple game of liar's dice for human, computer and AI.
  - On a call, if the player is wrong, they lose one die. If they are right, the previous player (who made the bet), loses one die.
  - On an exact, if the player is wrong, they lose one die. If they are right, they gain 2 dice. The previous player (who made the bet) is not effected.
  - Rounds are played, and people eliminated until only one person has a die/dice.
+ - Special "1" Joker rule: When counting the number of dice for __call__ or __exact__ actions, 1's are wildcards if (and only if) no player in the round has made a bet with a 1 (i.e. no one has called 4 1s). 
 
 ### Game Rule Translations
 - [中文 Chinese](README-translated/README-Chinese.md) 🇨🇳
