@@ -15,6 +15,9 @@ A simple game of liar's dice for human, computer and AI.
  - On an exact, if the player is wrong, they lose one die. If they are right, they gain 2 dice. The previous player (who made the bet) is not effected.
  - Rounds are played, and people eliminated until only one person has a die/dice.
 
+### Game Rule Translations
+- [中文 Chinese](README-translated/README-Chinese.md) 🇨🇳
+
 ## Usage
 First install
 ```shell
