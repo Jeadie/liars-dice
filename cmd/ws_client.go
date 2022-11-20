@@ -17,11 +17,11 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			// Create connection to server
 			c, err := network.ConnectToServer(wsServerAddr)
-			defer c.Close()
 			if err != nil {
 				log.Error().Err(err).Msg("failed to connect to server")
 				return
 			}
+			defer c.Close()
 
 			// Listens for Events, sends actions
 			events := make(chan game.Event)
@@ -53,7 +53,7 @@ var (
 )
 
 func init() {
-	wsClientCmd.LocalFlags().StringVar(&wsServerAddr, "ws-server", ":8321", "The network address hosting the liars dice websocket game.")
+	wsClientCmd.Flags().StringVar(&wsServerAddr, "ws-server", ":8321", "The network address hosting the liars dice websocket game.")
 	rootCmd.AddCommand(wsClientCmd)
 	cobra.OnInitialize(initConfig)
 }
