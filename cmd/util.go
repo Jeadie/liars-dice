@@ -27,6 +27,26 @@ func MakeAgents(n uint, humanIdx int, wsAgents chan *agents2.WsAgent, numWsAgent
 	return agents
 }
 
+func PlayGame(agents []agents2.Agent, dice []uint) {
+	agents2.SendGameStarted(agents, dice)
+	round := game.InitRound(dice, 0)
+	winnerIdx, hasWon := WinningPlayer(dice)
+	for !hasWon {
+		agentIdx, change := PlayRound(round, agents)
+
+		// Changes score from last game.
+		if int(dice[agentIdx])+change <= 0 {
+			dice[agentIdx] = 0
+		} else {
+			dice[agentIdx] = uint(int(dice[agentIdx]) + change)
+		}
+
+		winnerIdx, hasWon = WinningPlayer(dice)
+		round = game.InitRound(dice, 0)
+	}
+	agents2.SendGameComplete(agents, winnerIdx)
+}
+
 func PlayRound(round *game.Round, agents []agents2.Agent) (game.Agent, int) {
 	agents2.SendRoundStarted(agents, *round)
 

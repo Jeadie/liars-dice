@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
-	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
@@ -29,26 +28,8 @@ var (
 			}
 
 			dice := ConvertNumDice(args)
-			round := game.InitRound(dice, 0)
 			agents := MakeAgents(uint(len(dice)), humanAgent, agents2.ConstructWsAgents(wsAddr, socketAgents), socketAgents)
-
-			agents2.SendGameStarted(agents, dice)
-
-			winnerIdx, hasWon := WinningPlayer(dice)
-			for !hasWon {
-				agentIdx, change := PlayRound(round, agents)
-
-				// Changes score from last game.
-				if int(dice[agentIdx])+change <= 0 {
-					dice[agentIdx] = 0
-				} else {
-					dice[agentIdx] = uint(int(dice[agentIdx]) + change)
-				}
-
-				winnerIdx, hasWon = WinningPlayer(dice)
-				round = game.InitRound(dice, 0)
-			}
-			agents2.SendGameComplete(agents, winnerIdx)
+			PlayGame(agents, dice)
 		},
 	}
 )
