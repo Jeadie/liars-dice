@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
-	"github.com/Jeadie/liars-dice/pkg/game"
+	"github.com/Jeadie/liars-dice/pkg/play"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
@@ -30,7 +30,7 @@ var (
 
 			dice := ConvertNumDice(args)
 			agents := agents2.MakeAgents(uint(len(dice)), humanAgent, agents2.ConstructWsAgents(wsAddr, socketAgents), socketAgents)
-			game.PlayGame(agents, dice)
+			play.PlayGame(agents, dice)
 		},
 	}
 )

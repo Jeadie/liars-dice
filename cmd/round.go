@@ -4,6 +4,7 @@ import (
 	"fmt"
 	agents2 "github.com/Jeadie/liars-dice/pkg/agents"
 	"github.com/Jeadie/liars-dice/pkg/game"
+	"github.com/Jeadie/liars-dice/pkg/play"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -23,7 +24,7 @@ var (
 			agents := agents2.MakeAgents(uint(len(dice)), humanAgent, agents2.ConstructWsAgents(wsAddr, socketAgents), socketAgents)
 
 			agents2.SendGameStarted(agents, dice)
-			game.PlayRound(round, agents)
+			play.PlayRound(round, agents)
 		},
 	}
 )

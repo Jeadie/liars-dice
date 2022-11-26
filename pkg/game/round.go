@@ -42,7 +42,7 @@ func (a Action) ToString() string {
 }
 
 type Round struct {
-	Dice      [][]uint `json:"Dice"`
+	Dice      [][]uint `json:"Dice"` // TODO: probably want a *[][]uint
 	UsedOne   bool     `json:"UsedOne"`
 	CurrBet   Bet      `json:"Bet"`
 	CurrAgent Agent    `json:"Agent"`

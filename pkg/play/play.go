@@ -1,13 +1,14 @@
-package game
+package play
 
 import (
 	"github.com/Jeadie/liars-dice/pkg/agents"
+	"github.com/Jeadie/liars-dice/pkg/game"
 	"github.com/rs/zerolog/log"
 )
 
 func PlayGame(ags []agents.Agent, dice []uint) {
 	agents.SendGameStarted(ags, dice)
-	round := InitRound(dice, 0)
+	round := game.InitRound(dice, 0)
 	winnerIdx, hasWon := WinningPlayer(dice)
 	for !hasWon {
 		agentIdx, change := PlayRound(round, ags)
@@ -20,21 +21,21 @@ func PlayGame(ags []agents.Agent, dice []uint) {
 		}
 
 		winnerIdx, hasWon = WinningPlayer(dice)
-		round = InitRound(dice, 0)
+		round = game.InitRound(dice, 0)
 	}
 	agents.SendGameComplete(ags, winnerIdx)
 }
 
-func PlayRound(round *Round, ags []agents.Agent) (Agent, int) {
+func PlayRound(round *game.Round, ags []agents.Agent) (game.Agent, int) {
 	agents.SendRoundStarted(ags, *round)
 
 	// TODO: Rotate who starts.
 	// Consecutive agent's turn
 	for true {
 		for i, agent := range ags {
-			e := Event{
-				EType:     AgentTurn,
-				AgentTurn: &AgentTurnEvent{},
+			e := game.Event{
+				EType:     game.AgentTurn,
+				AgentTurn: &game.AgentTurnEvent{},
 			}
 			agent.Handle(e)
 			log.Debug().Interface("event", e).Send()
@@ -44,18 +45,18 @@ func PlayRound(round *Round, ags []agents.Agent) (Agent, int) {
 				continue
 			}
 			act := agent.Play(*round)
-			agentIdx, changeDice, err := round.PlayTurn(Agent(i), act)
+			agentIdx, changeDice, err := round.PlayTurn(game.Agent(i), act)
 			for err != nil {
-				e := Event{EType: InvalidAction, InvalidAction: &InvalidActionEvent{
+				e := game.Event{EType: game.InvalidAction, InvalidAction: &game.InvalidActionEvent{
 					InvalidAction: act,
 					Err:           err.Error(),
 				}}
 				agent.Handle(e)
 				log.Debug().Interface("event", e).Send()
 				act := agent.Play(*round)
-				agentIdx, changeDice, err = round.PlayTurn(Agent(i), act)
+				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
-			agents.SendTurnEvent(ags, act, Agent(i))
+			agents.SendTurnEvent(ags, act, game.Agent(i))
 
 			if changeDice != 0 {
 				agents.SendRoundComplete(ags, agentIdx, changeDice)
@@ -67,15 +68,15 @@ func PlayRound(round *Round, ags []agents.Agent) (Agent, int) {
 }
 
 // WinningPlayer finds and, if exists, returns the index of the winning player (and whether there was a winning player).
-func WinningPlayer(d []uint) (Agent, bool) {
-	var winner Agent
+func WinningPlayer(d []uint) (game.Agent, bool) {
+	var winner game.Agent
 	tot := uint(0)
 	winnersDice := uint(0)
 
 	for i, u := range d {
 		tot += u
 		if u != 0 {
-			winner = Agent(i)
+			winner = game.Agent(i)
 			winnersDice = u
 		}
 	}
