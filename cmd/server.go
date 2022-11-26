@@ -2,28 +2,35 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/Jeadie/liars-dice/pkg/agents"
+	"github.com/Jeadie/liars-dice/pkg/network"
+	"github.com/Jeadie/liars-dice/pkg/play"
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"net/http"
 	"time"
 )
 
-type TestPaylod struct {
-	Foo string `json:"foo"`
-}
-
 func SingleGameHandler(w http.ResponseWriter, r *http.Request) {
-	x := TestPaylod{Foo: "bar"}
-	b, err := json.Marshal(x)
+	e := hlog.FromRequest(r).Debug()
+	defer e.Send()
+
+	conn, err := network.UpgradeToWebsockets(w, r)
+
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		b, _ := json.Marshal(fmt.Errorf("Bad foo bar"))
+		w.WriteHeader(http.StatusTeapot)
+		b, _ := json.Marshal(err)
 		w.Write(b)
+		e = e.Err(err)
 	} else {
+		agent := agents.CreateWsAgent(conn)
+		go play.PlayGame(
+			[]agents.Agent{agent, agents.ConstructProbAgent(), agents.ConstructProbAgent()},
+			[]uint{3, 3, 3},
+		)
 		w.WriteHeader(http.StatusOK)
-		w.Write(b)
 	}
 }
 

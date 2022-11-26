@@ -47,6 +47,13 @@ type WsAgent struct {
 	commands []game.Action // Returned from the websocket.
 }
 
+func CreateWsAgent(conn *websocket.Conn) *WsAgent {
+	return &WsAgent{
+		conn:     conn,
+		commands: make([]game.Action, 0),
+	}
+}
+
 // listenForCommands from the websocket connection. Store locally for use when invoked.
 func (agent *WsAgent) listenForCommands() {
 	for {
