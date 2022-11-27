@@ -40,6 +40,9 @@ var (
 				if e.EType == game.AgentTurn {
 					actions <- h.Play(*round)
 				}
+				if e.EType == game.Turn {
+					log.Debug().Int("agent", int(e.Turn.ActionAgent)).Msg("Agent has played turne")
+				}
 
 				if e.EType == game.GameComplete {
 					close(events)

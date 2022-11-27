@@ -8,9 +8,9 @@ import (
 
 func PlayGame(ags []agents.Agent, dice []uint) {
 	agents.SendGameStarted(ags, dice)
-	round := game.InitRound(dice, 0)
 	winnerIdx, hasWon := WinningPlayer(dice)
 	for !hasWon {
+		round := game.InitRound(dice, 0)
 		agentIdx, change := PlayRound(round, ags)
 
 		// Changes score from last
@@ -21,7 +21,6 @@ func PlayGame(ags []agents.Agent, dice []uint) {
 		}
 
 		winnerIdx, hasWon = WinningPlayer(dice)
-		round = game.InitRound(dice, 0)
 	}
 	agents.SendGameComplete(ags, winnerIdx)
 }
@@ -42,6 +41,8 @@ func PlayRound(round *game.Round, ags []agents.Agent) (game.Agent, int) {
 
 			// Ignore evicted players
 			if len(round.Dice[i]) == 0 {
+				log.Debug().Int("evicted player", i).Send()
+				round.IncrementCurrentAgent()
 				continue
 			}
 			act := agent.Play(*round)
@@ -53,10 +54,11 @@ func PlayRound(round *game.Round, ags []agents.Agent) (game.Agent, int) {
 				}}
 				agent.Handle(e)
 				log.Debug().Interface("event", e).Send()
-				act := agent.Play(*round)
+				act = agent.Play(*round)
 				agentIdx, changeDice, err = round.PlayTurn(game.Agent(i), act)
 			}
 			agents.SendTurnEvent(ags, act, game.Agent(i))
+			round.IncrementCurrentAgent()
 
 			if changeDice != 0 {
 				agents.SendRoundComplete(ags, agentIdx, changeDice)

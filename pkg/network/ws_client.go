@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/url"
 	"os"
+	"os/signal"
 )
 
 func handleIncomingEvents(c *websocket.Conn, output chan game.Event) {
@@ -39,6 +40,8 @@ func ConnectToServer(addr string) (*websocket.Conn, error) {
 func Handle(c *websocket.Conn, incoming chan game.Event, outgoing chan game.Action) {
 	done := make(chan interface{})    // Channel to indicate that the receiverHandler is done
 	interrupt := make(chan os.Signal) // OS interrupts
+	signal.Notify(interrupt, os.Interrupt)
+
 	go handleIncomingEvents(c, incoming)
 
 	for {
@@ -47,6 +50,7 @@ func Handle(c *websocket.Conn, incoming chan game.Event, outgoing chan game.Acti
 			return
 		case <-interrupt:
 			CloseConn(c)
+			signal.Reset(os.Interrupt)
 		case act := <-outgoing:
 			err := sendAction(c, act)
 			if err != nil {
@@ -64,13 +68,4 @@ func sendAction(conn *websocket.Conn, act game.Action) error {
 		return err
 	}
 	return conn.WriteMessage(websocket.TextMessage, v)
-}
-
-func CloseConn(c *websocket.Conn) {
-	err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-	if err != nil {
-		log.Warn().Err(err).Msg("Failed to close websocket connection normally.")
-		return
-	}
-	// TODO: handle CloseMessage response from server.
 }

@@ -22,14 +22,16 @@ func SingleGameHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		b, _ := json.Marshal(err)
 		w.Write(b)
+		if err != nil {
+			return
+		}
 		e = e.Err(err)
 	} else {
 		agent := agents.CreateWsAgent(conn)
-		go play.PlayGame(
+		play.PlayGame(
 			[]agents.Agent{agent, agents.ConstructProbAgent(), agents.ConstructProbAgent()},
 			[]uint{3, 3, 3},
 		)
-		w.WriteHeader(http.StatusOK)
 	}
 }
 

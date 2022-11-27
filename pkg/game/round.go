@@ -69,7 +69,6 @@ func (r *Round) Raise(agent Agent, bet Bet) error {
 		return fmt.Errorf("%d %ds does not raise %d %ds", bet[0], bet[1], r.CurrBet[0], r.CurrBet[1])
 	}
 	r.CurrBet = bet
-	r.CurrAgent = Agent((int(r.CurrAgent) + 1) % len(r.Dice))
 	r.UsedOne = r.UsedOne || bet[1] == 1
 	return nil
 }
@@ -187,4 +186,8 @@ func Mod(x, m int) int {
 		return y + m
 	}
 	return y
+}
+
+func (r *Round) IncrementCurrentAgent() {
+	r.CurrAgent = Agent((int(r.CurrAgent) + 1) % len(r.Dice))
 }
