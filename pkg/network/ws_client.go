@@ -27,8 +27,12 @@ func handleIncomingEvents(c *websocket.Conn, output chan game.Event) {
 	}
 }
 func ConnectToServer(addr string) (*websocket.Conn, error) {
-	u := url.URL{Scheme: "ws", Host: addr, Path: "/"}
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	var c *websocket.Conn
+	u, err := url.Parse(addr)
+	if err != nil {
+		return c, err
+	}
+	c, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
 	return c, err
 }
 

@@ -20,7 +20,6 @@ func SingleGameHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := network.UpgradeToWebsockets(w, r)
 
 	if err != nil {
-		w.WriteHeader(http.StatusTeapot)
 		b, _ := json.Marshal(err)
 		w.Write(b)
 		e = e.Err(err)

@@ -53,7 +53,7 @@ var (
 )
 
 func init() {
-	wsClientCmd.Flags().StringVar(&wsServerAddr, "ws-server", ":8321", "The network address hosting the liars dice websocket game.")
+	wsClientCmd.Flags().StringVar(&wsServerAddr, "ws-server", "ws://0.0.0.0:8321", "The network address hosting the liars dice websocket game.")
 	rootCmd.AddCommand(wsClientCmd)
 	cobra.OnInitialize(initConfig)
 }
